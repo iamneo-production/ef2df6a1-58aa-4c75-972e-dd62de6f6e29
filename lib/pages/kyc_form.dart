@@ -72,6 +72,7 @@ class _KYCFormState extends State<KYCForm> {
 
   final kycForm = GlobalKey<FormState>();
   final dateOfBirth = DateRangePickerController();
+  final _nameValidator = RequiredValidator(errorText: "Field is required");
   void sendFile(
       {required path, required String uuid, required String docName}) async {
     File file = File(path);
@@ -92,7 +93,9 @@ class _KYCFormState extends State<KYCForm> {
       'address_line_1': _address1Controller.text.trim(),
       'address_line_2': _address2Controller.text.trim(),
       'state': _state,
-      'postal_code': int.parse(_postCodeController.text)
+      'postal_code': int.parse(_postCodeController.text),
+      'verfied_phone': false,
+      'kyc_status': 'Pending'
     });
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => KYCForm()));
@@ -105,7 +108,8 @@ class _KYCFormState extends State<KYCForm> {
           title: cStep == 0 ? Text('Basic Information') : Text(""),
           content: Column(
             children: [
-              TextField(
+              TextFormField(
+                validator: _nameValidator,
                 controller: _firstNameController,
                 decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -121,7 +125,8 @@ class _KYCFormState extends State<KYCForm> {
               SizedBox(
                 height: 5,
               ),
-              TextField(
+              TextFormField(
+                validator: _nameValidator,
                 controller: _lastNameController,
                 decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -171,7 +176,8 @@ class _KYCFormState extends State<KYCForm> {
             title: cStep == 1 ? Text('Address') : Text(""),
             content: Column(
               children: [
-                TextField(
+                TextFormField(
+                  validator: _nameValidator,
                   controller: _address1Controller,
                   decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(
@@ -187,7 +193,8 @@ class _KYCFormState extends State<KYCForm> {
                 SizedBox(
                   height: 5,
                 ),
-                TextField(
+                TextFormField(
+                  validator: _nameValidator,
                   controller: _address2Controller,
                   decoration: InputDecoration(
                       enabledBorder: OutlineInputBorder(
@@ -264,7 +271,7 @@ class _KYCFormState extends State<KYCForm> {
                             if (result!.count == 0 || result == null)
                               throw new Exception("No file chosen");
                             sendFile(
-                                path: result?.files.single.path,
+                                path: result.files.single.path,
                                 docName: 'Aadhar',
                                 uuid: uid!);
                             setState(() {
@@ -305,7 +312,7 @@ class _KYCFormState extends State<KYCForm> {
                             if (result!.count == 0 || result == null)
                               throw new Exception("No file chosen");
                             sendFile(
-                                path: result?.files.single.path,
+                                path: result.files.single.path,
                                 docName: 'PAN',
                                 uuid: uid!);
                             setState(() {
@@ -346,7 +353,7 @@ class _KYCFormState extends State<KYCForm> {
                             if (result!.count == 0 || result == null)
                               throw new Exception("No file chosen");
                             sendFile(
-                                path: result?.files.single.path,
+                                path: result.files.single.path,
                                 docName: 'Sign',
                                 uuid: uid!);
                             setState(() {
@@ -380,46 +387,62 @@ class _KYCFormState extends State<KYCForm> {
           title: Text("Know your Customer"),
         ),
         body: SizedBox.expand(
-          child: Stepper(
-            physics: BouncingScrollPhysics(),
-            type: StepperType.horizontal,
-            steps: getSteps(),
-            currentStep: cStep,
-            onStepTapped: (step) => setState(() {
-              cStep = step;
-            }),
-            onStepContinue: () {
-              setState(() {
+          child: Form(
+            key: kycForm,
+            child: Stepper(
+              physics: BouncingScrollPhysics(),
+              type: StepperType.horizontal,
+              steps: getSteps(),
+              currentStep: cStep,
+              onStepTapped: (step) => setState(() {
+                cStep = step;
+              }),
+              onStepContinue: () {
                 final isLastStep = cStep == getSteps().length - 1;
                 if (isLastStep) {
-                  //call data
+                  if (!kycForm.currentState!.validate()) {
+                    var snackBar = SnackBar(
+                      elevation: 0,
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: Colors.transparent,
+                      content: AwesomeSnackbarContent(
+                        title: 'Check all fields',
+                        message: 'Please try Again',
+                        contentType: ContentType.failure,
+                      ),
+                    );
+
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }
+                  submitForm();
                 } else {
-                  cStep += 1;
+                  setState(() {
+                    cStep += 1;
+                  });
                 }
-              });
-            },
-            onStepCancel: cStep == 0
-                ? null
-                : () => setState(() {
-                      cStep -= 1;
-                    }),
-            controlsBuilder: (context, details) {
-              final isLastStep = cStep == getSteps().length - 1;
-              return Row(
-                children: [
-                  if (cStep != 0)
+              },
+              onStepCancel: cStep == 0
+                  ? null
+                  : () => setState(() {
+                        cStep -= 1;
+                      }),
+              controlsBuilder: (context, details) {
+                final isLastStep = cStep == getSteps().length - 1;
+                return Row(
+                  children: [
+                    if (cStep != 0)
+                      ElevatedButton(
+                          onPressed: details.onStepCancel, child: Text("Back")),
+                    SizedBox(
+                      width: 30,
+                    ),
                     ElevatedButton(
-                        onPressed: details.onStepCancel, child: Text("Back")),
-                  SizedBox(
-                    width: 30,
-                  ),
-                  ElevatedButton(
-                      onPressed:
-                          isLastStep ? submitForm : details.onStepContinue,
-                      child: Text(isLastStep ? "Confirm" : "Next"))
-                ],
-              );
-            },
+                        onPressed: details.onStepContinue,
+                        child: Text(isLastStep ? "Confirm" : "Next"))
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

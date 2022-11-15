@@ -44,6 +44,8 @@ dependencies:
   checkbox_grouped: ^1.8.1
   file_picker: ^5.2.2
   syncfusion_flutter_datepicker: ^20.3.56
+  google_nav_bar: ^5.0.6
+  stellar_flutter_sdk: ^1.2.3
 
 dev_dependencies:
   flutter_test:
