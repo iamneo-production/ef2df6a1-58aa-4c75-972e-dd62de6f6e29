@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_remix/flutter_remix.dart';
 import 'package:neobank/pages/utils/neobutton.dart';
+import 'package:neobank/util/create_stellar_account.dart';
 
 import 'HomePage/FrontPage.dart';
 
@@ -38,6 +39,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    String recKey = 'SA7ZPMJ5IOT52N6WCRPPOC23UO42ZSAW4QRIFO4PLIR456KZBUOCDE2V';
+    String bal = ''; //example account
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -62,14 +65,20 @@ class _HomePageState extends State<HomePage> {
                         // height: 100,
                         width: 50,
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () async {
+                            String s1 = await StellarFunctions.checkBalance(
+                                _userDetails!['secret_key']);
+                            setState(() {
+                              bal = s1;
+                            });
+                          },
                           color: Colors.blue,
                           icon: Icon(FlutterRemix.user_add_line,
                               color: Colors.white),
                         ),
                       ),
                       SizedBox(height: 5),
-                      Text("Add accounts")
+                      if (bal == '') Text("View balance") else Text("$bal INR")
                     ],
                   ),
                 ),
@@ -86,14 +95,17 @@ class _HomePageState extends State<HomePage> {
                         // height: 100,
                         width: 50,
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            StellarFunctions.transferMoney(
+                                '1000', _userDetails!['secret_key'], recKey);
+                          },
                           color: Colors.blue,
                           icon: Icon(FlutterRemix.bank_card_line,
                               color: Colors.white),
                         ),
                       ),
                       SizedBox(height: 5),
-                      Text("View balance")
+                      Text("Transfer Money")
                     ],
                   ),
                 ),
@@ -110,7 +122,10 @@ class _HomePageState extends State<HomePage> {
                         // height: 100,
                         width: 50,
                         child: IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            StellarFunctions.transferMoneyFromBank(
+                                '1000', _userDetails!['secret_key']);
+                          },
                           color: Colors.blue,
                           icon: Icon(FlutterRemix.money_dollar_circle_line,
                               color: Colors.white),

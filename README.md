@@ -1,6 +1,12 @@
-# neobank
+## Introduction:
+This repository entails our submission for the T-AIM NASSCOM hackathon for the problem statement of Neo-bank
 
-A new Flutter project.
+### Technologies Used:
+- Flutter
+- Firebase(Backend-can be migrated b/w other backends)
+- Stellar(Blockchain)
+- Python
+
 
 ## Getting Started
 
