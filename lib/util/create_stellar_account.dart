@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart';
+import 'dart:convert';
 
 class StellarFunctions {
   static Future<String> createStellarAccount() async {
@@ -31,7 +32,7 @@ class StellarFunctions {
       KeyPair neobank = KeyPair.fromSecretSeed(
           "SB5O3DDMGUHDZ4IQJO6D4TYBMPH3QTDXGO3MRTEW7JOH3GZIBK34JELV");
       KeyPair cust = KeyPair.fromSecretSeed(sKey);
-      Asset iomAsset = AssetTypeCreditAlphaNum4("IOM", issuer.accountId);
+      Asset iomAsset = AssetTypeCreditAlphaNum4("INR", issuer.accountId);
       AccountResponse nb = await sdk.accounts.account(neobank.accountId);
       Transaction transaction = new TransactionBuilder(nb)
           .addOperation(
@@ -39,9 +40,16 @@ class StellarFunctions {
           .build();
       transaction.sign(neobank, Network.TESTNET);
 
+      print(transaction.signatures!.first);
+      // print(transaction.hash());
+      print(transaction.sequenceNumber);
+      print(transaction.operations!.first);
       final resp = await sdk.submitTransaction(transaction);
-      return resp.hash!;
+      print(resp.envelopeXdr);
+      print(resp.resultXdr);
+      return resp.success ? "Success" : "Failure";
     } catch (e) {
+      print(e);
       return 'Error';
     }
   }
