@@ -9,8 +9,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:stellar_flutter_sdk/stellar_flutter_sdk.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:neobank/util/create_stellar_account.dart';
 
 class KYCForm extends StatefulWidget {
   const KYCForm({super.key});
@@ -84,7 +86,14 @@ class _KYCFormState extends State<KYCForm> {
   bool isUploadedAadhar = false;
   bool isUploadedPan = false;
   bool isUploadedSign = false;
+  late String blkseed;
   void submitForm() async {
+    await StellarFunctions.createStellarAccount().then((value) {
+      setState(() {
+        blkseed = value;
+      });
+    });
+    KeyPair kp = KeyPair.fromSecretSeed(blkseed);
     FirebaseFirestore.instance.collection('customer').doc(uid).set({
       'first_name': _firstNameController.text.trim(),
       'last_name': _lastNameController.text.trim(),
@@ -95,7 +104,14 @@ class _KYCFormState extends State<KYCForm> {
       'state': _state,
       'postal_code': int.parse(_postCodeController.text),
       'verfied_phone': false,
-      'kyc_status': 'Pending'
+      'kyc_status': 'Pending',
+      'secret_key': blkseed
+    });
+    FirebaseFirestore.instance.collection('account').doc(uid).set({
+      'first_name': _firstNameController.text.trim(),
+      'secret_key': blkseed,
+      'account_id': kp.accountId,
+      'balance': 1000.00,
     });
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => KYCForm()));
@@ -266,7 +282,7 @@ class _KYCFormState extends State<KYCForm> {
                                 await FilePicker.platform.pickFiles(
                               type: FileType.custom,
                               allowMultiple: false,
-                              allowedExtensions: ['jpg', 'pdf'],
+                              allowedExtensions: ['pdf'],
                             );
                             if (result!.count == 0 || result == null)
                               throw new Exception("No file chosen");
@@ -428,7 +444,7 @@ class _KYCFormState extends State<KYCForm> {
                       }),
               controlsBuilder: (context, details) {
                 final isLastStep = cStep == getSteps().length - 1;
-                return Row(
+                return Column(
                   children: [
                     if (cStep != 0)
                       ElevatedButton(
