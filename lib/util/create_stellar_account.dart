@@ -24,7 +24,7 @@ class StellarFunctions {
     return (acc.secretSeed);
   }
 
-  static Future<String> transferMoney(String amt, String sKey) async {
+  static Future<String> transferMoneyFromBank(String amt, String sKey) async {
     try {
       StellarSDK sdk = StellarSDK.TESTNET;
       KeyPair issuer = KeyPair.fromSecretSeed(
@@ -39,6 +39,37 @@ class StellarFunctions {
               PaymentOperationBuilder(cust.accountId, iomAsset, amt).build())
           .build();
       transaction.sign(neobank, Network.TESTNET);
+
+      print(transaction.signatures!.first);
+      // print(transaction.hash());
+      print(transaction.sequenceNumber);
+      print(transaction.operations!.first);
+      final resp = await sdk.submitTransaction(transaction);
+      print(resp.envelopeXdr);
+      print(resp.resultXdr);
+      return resp.success ? "Success" : "Failure";
+    } catch (e) {
+      print(e);
+      return 'Error';
+    }
+  }
+
+  static Future<String> transferMoney(
+      String amt, String sender, String receiver) async {
+    try {
+      StellarSDK sdk = StellarSDK.TESTNET;
+      KeyPair issuer = KeyPair.fromSecretSeed(
+          "SADPSHZQT5KPEQDVSWJH44BJJEMM5VJRNPVLONV4HQGISCTRILPHC66R");
+      KeyPair sender1 = KeyPair.fromSecretSeed(sender);
+      KeyPair receiver1 = KeyPair.fromSecretSeed(receiver);
+      Asset iomAsset = AssetTypeCreditAlphaNum4("INR", issuer.accountId);
+      AccountResponse nb = await sdk.accounts.account(sender1.accountId);
+      Transaction transaction = new TransactionBuilder(nb)
+          .addOperation(
+              PaymentOperationBuilder(receiver1.accountId, iomAsset, amt)
+                  .build())
+          .build();
+      transaction.sign(sender1, Network.TESTNET);
 
       print(transaction.signatures!.first);
       // print(transaction.hash());
