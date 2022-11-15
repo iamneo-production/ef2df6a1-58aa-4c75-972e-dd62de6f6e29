@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "880513019281",
+    "project_id": "neobank-a2c13",
+    "storage_bucket": "neobank-a2c13.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:880513019281:android:a2f8468f639a6adbb27e30",
+        "android_client_info": {
+          "package_name": "com.example.neobank"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "880513019281-n8hopgteq0lqjr0rt65mdu65ueiiralu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBzPFLbh4kpueZUhc8Xp4piCPn7E9xhjNE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "880513019281-n8hopgteq0lqjr0rt65mdu65ueiiralu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
